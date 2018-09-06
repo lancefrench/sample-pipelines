@@ -1,0 +1,7 @@
+product-properties:
+  .properties.networking_poe_ssl_certs:
+    value:
+    - certificate:
+        cert_pem: ((networking_poe_ssl_cert))
+        private_key_pem: ((networking_poe_ssl_cert_privatekey))
+      name: ((networking_poe_ssl_cert_name))

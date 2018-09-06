@@ -1,0 +1,41 @@
+resources: 
+- name: pipeline-utilities
+  type: git
+  source: 
+    uri: https://github.com/pivotalservices/pipeline-utilities.git
+
+- name: sample-pipelines
+  type: git
+  source:
+    uri: https://github.com/lancefrench/sample-pipelines.git
+
+- name: om-cli
+  type: github-release
+  source:
+    user: pivotal-cf
+    repository: om
+ 
+jobs:
+- name: update-ssl-certificate
+  plan:
+  - aggregate:
+    - get: pipeline-utilities
+    - get: sample-pipelines
+    - get: om-cli
+      params:
+        globs:
+        - "*-linux"
+    
+  - task: create-product-secrets
+    file: pipeline-utilities/tasks/create-product-secrets.yml
+    params:
+      PRODUCT_networking_poe_ssl_cert: ((wildcard_pem))
+      PRODUCT_networking_poe_ssl_cert_privatekey: ((wildcard_private_key))
+      PRODUCT_networking_poe_ssl_cert_name: ((wildcard_cert_name))
+
+  - task: configure-pas
+    file: sample-pipelines/tasks/configure-pas/task.yml
+    params:
+      OPSMAN_DOMAIN_OR_IP_ADDRESS: ((opsman_domain_or_ip_address))
+      OPSMAN_USERNAME: ((opsman_username))
+      OPSMAN_PASSWORD: ((opsman_password))
